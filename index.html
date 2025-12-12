@@ -368,7 +368,7 @@
                 <div class="section-title">주거지원 정보</div>
                 
                 <div class="input-group">
-                    <label class="input-label">우대금리 적용금액 (우대금리 물량대출 기준금액)</label>
+                    <label class="input-label">우대금리 적용금액 (<span class="highlight">우대금리 물량대출 기준금액</span>)</label>
                     <div class="input-wrapper">
                         <input type="text" id="preferential" class="input-field" disabled value="">
                         <span class="unit">원</span>
@@ -401,7 +401,7 @@
                 <strong>📌 계산식 안내</strong>
                 • LH 전세지원금 = 전세보증금 - 입주자자본부담금<br>
                 • 보증금손실액 = 피해주택 임차보증금 - 배당금<br>
-                • 우대금리 월임대료 = <span class="highlight">우대금리 물량대출 기준금액</span> × 1.7% ÷ 12<br>
+                • 우대금리 월임대료 = 우대금리 물량대출 기준금액 × 1.7% ÷ 12<br>
                 &nbsp;&nbsp;(기본이율 2.2% - 추대금리 0.5% = 1.7%)<br>
                 • 일반금리 월임대료 = (LH지원금 - 피해주택 임차보증금) × 2.2% ÷ 12
             </div>
@@ -442,7 +442,7 @@
                 <strong>📌 계산식 안내</strong>
                 • LH 전세지원금 = 전세보증금 - 입주자자본부담금<br>
                 • 보증금손실액 = 피해주택 임차보증금 - 배당금<br>
-                • 우대금리 월임대료 = <span class="highlight">우대금리 물량대출 기준금액</span> × ${effectiveRatePercent}% ÷ ${CONSTANTS.MONTHS}<br>
+                • 우대금리 월임대료 = 우대금리 물량대출 기준금액 × ${effectiveRatePercent}% ÷ ${CONSTANTS.MONTHS}<br>
                 &nbsp;&nbsp;(기본이율 ${baseRatePercent}% - 우대금리 ${preferentialRatePercent}% = ${effectiveRatePercent}%)<br>
                 • 일반금리 월임대료 = (LH지원금 - 피해주택 임차보증금) × ${baseRatePercent}% ÷ ${CONSTANTS.MONTHS}
             `;

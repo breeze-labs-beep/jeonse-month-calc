@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전세임대 월임대료 계산기</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .credits {
+            position: absolute;
+            bottom: 15px;
+            right: 20px;
+            text-align: right;
+            font-size: 11px;
+            opacity: 0.85;
+            line-height: 1.5;
+        }
+
+        .credits div {
+            margin-bottom: 2px;
+        }
+
+        @media (max-width: 768px) {
+            .credits {
+                position: static;
+                text-align: center;
+                margin-top: 15px;
+                padding-top: 15px;
+                border-top: 1px solid rgba(255, 255, 255, 0.3);
+            }
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '📋';
+            margin-right: 8px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 50px 12px 15px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-field:disabled {
+            background-color: #f0f0f0;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .input-field.error {
+            border-color: #dc3545;
+            animation: shake 0.3s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .unit {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .result-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+
+        .result-section .section-title {
+            color: white;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .result-section .section-title::before {
+            content: '💰';
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .result-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #856404;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #664d03;
+        }
+
+        .highlight {
+            color: #0066cc;
+            font-weight: 600;
+        }
+
+        .result-notice {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 13px;
+            line-height: 1.6;
+            border-left: 3px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .result-notice .amount {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .result-value {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>전세임대 월임대료 계산기</h1>
+            <p>간편하게 월임대료를 계산해보세요</p>
+            <div class="credits">
+                <div>제공자: 그린님</div>
+                <div>만든이: 쿤스</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- 전세임대 정보 -->
+            <div class="section">
+                <div class="section-title">전세임대 정보</div>
+                
+                <div class="input-group">
+                    <label class="input-label">전세임대주택(집주인측)과의 전세보증금</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="jeonse" class="input-field" placeholder="예: 230,000,000" value="">
+                        <span class="unit">원</span>
+                    </div>
+                    <div class="error-message" id="jeonse-error">전세보증금을 입력해주세요</div>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">LH 전세지원금 (물량배분 후과 기준금액)</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="lh" class="input-field" disabled value="">
+                        <span class="unit">원</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">입주자자본부담금 (고정값)</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="capital" class="input-field" disabled value="2,000,000">
+                        <span class="unit">원</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 피해주택 정보 -->
+            <div class="section">
+                <div class="section-title">피해주택 정보</div>
+                
+                <div class="input-group">
+                    <label class="input-label">피해주택 임차보증금</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="damaged" class="input-field" placeholder="예: 100,000,000" value="">
+                        <span class="unit">원</span>
+                    </div>
+                    <div class="error-message" id="damaged-error">피해주택 임차보증금을 입력해주세요</div>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">배당금</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="dividend" class="input-field" placeholder="예: 47,688,282" value="">
+                        <span class="unit">원</span>
+                    </div>
+                    <div class="error-message" id="dividend-error">배당금을 입력해주세요</div>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">ⓒ 보증금손실액 (자동계산)</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="loss" class="input-field" disabled value="">
+                        <span class="unit">원</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 주거지원 정보 -->
+            <div class="section">
+                <div class="section-title">주거지원 정보</div>
+                
+                <div class="input-group">
+                    <label class="input-label">우대금리 적용금액 (우대금리 물량대출 기준금액)</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="preferential" class="input-field" disabled value="">
+                        <span class="unit">원</span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="calculate-btn" onclick="calculate()">💡 계산하기</button>
+
+            <!-- 월 임대료 결과 -->
+            <div class="result-section" id="resultSection" style="display: none;">
+                <div class="section-title">월 임대료</div>
+                
+                <div class="result-item">
+                    <div class="result-label">우대금리 월임대료<br><small><span class="highlight">부과항목, 자금 또는 지원</span></small></div>
+                    <div class="result-value" id="preferentialRent">0원</div>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-label">일반금리 월임대료<br><small><span class="highlight">입주자 부담</span></small></div>
+                    <div class="result-value" id="normalRent">0원</div>
+                </div>
+
+                <div class="result-notice">
+                    * 우대금리 임대료는 보증금손실액(<span class="amount" id="lossAmount">0원</span>)이 소진될 때까지 부과되지 않습니다.
+                </div>
+            </div>
+
+            <div class="info-box" id="info-box">
+                <strong>📌 계산식 안내</strong>
+                • LH 전세지원금 = 전세보증금 - 입주자자본부담금<br>
+                • 보증금손실액 = 피해주택 임차보증금 - 배당금<br>
+                • 우대금리 월임대료 = <span class="highlight">우대금리 물량대출 기준금액</span> × 1.7% ÷ 12<br>
+                &nbsp;&nbsp;(기본이율 2.2% - 추대금리 0.5% = 1.7%)<br>
+                • 일반금리 월임대료 = (LH지원금 - 피해주택 임차보증금) × 2.2% ÷ 12
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 상수 정의 =====
+        const CONSTANTS = {
+            CAPITAL_BURDEN: 2000000,           // 입주자자본부담금
+            BASE_RATE: 0.022,                   // 기본이율 2.2%
+            PREFERENTIAL_RATE: 0.005,           // 추대금리 0.5%
+            EFFECTIVE_RATE: 0.017,              // 우대금리 (2.2% - 0.5% = 1.7%)
+            MONTHS: 12                          // 월 수
+        };
+
+        // 숫자 포맷팅 함수
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        // 쉼표 제거 함수
+        function removeCommas(str) {
+            return str.replace(/,/g, '');
+        }
+
+        // 페이지 로드 시 고정값 및 안내 텍스트 설정
+        window.addEventListener('DOMContentLoaded', function() {
+            // 입주자자본부담금 고정값 설정
+            document.getElementById('capital').value = formatNumber(CONSTANTS.CAPITAL_BURDEN);
+
+            // 안내 텍스트 동적 생성
+            const baseRatePercent = (CONSTANTS.BASE_RATE * 100).toFixed(1);
+            const preferentialRatePercent = (CONSTANTS.PREFERENTIAL_RATE * 100).toFixed(1);
+            const effectiveRatePercent = (CONSTANTS.EFFECTIVE_RATE * 100).toFixed(1);
+
+            document.getElementById('info-box').innerHTML = `
+                <strong>📌 계산식 안내</strong>
+                • LH 전세지원금 = 전세보증금 - 입주자자본부담금<br>
+                • 보증금손실액 = 피해주택 임차보증금 - 배당금<br>
+                • 우대금리 월임대료 = <span class="highlight">우대금리 물량대출 기준금액</span> × ${effectiveRatePercent}% ÷ ${CONSTANTS.MONTHS}<br>
+                &nbsp;&nbsp;(기본이율 ${baseRatePercent}% - 우대금리 ${preferentialRatePercent}% = ${effectiveRatePercent}%)<br>
+                • 일반금리 월임대료 = (LH지원금 - 피해주택 임차보증금) × ${baseRatePercent}% ÷ ${CONSTANTS.MONTHS}
+            `;
+        });
+
+        // 입력 필드에 자동 포맷팅 적용
+        const inputFields = ['jeonse', 'damaged', 'dividend'];
+        inputFields.forEach(id => {
+            const field = document.getElementById(id);
+            field.addEventListener('input', function(e) {
+                let value = removeCommas(e.target.value);
+                if (value && !isNaN(value)) {
+                    e.target.value = formatNumber(value);
+                }
+            });
+
+            field.addEventListener('blur', function(e) {
+                let value = removeCommas(e.target.value);
+                if (value && !isNaN(value)) {
+                    e.target.value = formatNumber(value);
+                }
+            });
+        });
+
+        // 계산 함수
+        function calculate() {
+            // 에러 초기화
+            clearErrors();
+
+            // 입력값 가져오기 (쉼표 제거)
+            const jeonseValue = document.getElementById('jeonse').value.trim();
+            const damagedValue = document.getElementById('damaged').value.trim();
+            const dividendValue = document.getElementById('dividend').value.trim();
+
+            let hasError = false;
+
+            // 전세보증금 검증
+            if (!jeonseValue) {
+                showError('jeonse', '전세보증금을 입력해주세요');
+                hasError = true;
+            } else if (isNaN(removeCommas(jeonseValue)) || parseFloat(removeCommas(jeonseValue)) <= 0) {
+                showError('jeonse', '올바른 금액을 입력해주세요');
+                hasError = true;
+            }
+
+            // 피해주택 임차보증금 검증
+            if (!damagedValue) {
+                showError('damaged', '피해주택 임차보증금을 입력해주세요');
+                hasError = true;
+            } else if (isNaN(removeCommas(damagedValue)) || parseFloat(removeCommas(damagedValue)) <= 0) {
+                showError('damaged', '올바른 금액을 입력해주세요');
+                hasError = true;
+            }
+
+            // 배당금 검증
+            if (!dividendValue) {
+                showError('dividend', '배당금을 입력해주세요');
+                hasError = true;
+            } else if (isNaN(removeCommas(dividendValue)) || parseFloat(removeCommas(dividendValue)) < 0) {
+                showError('dividend', '올바른 금액을 입력해주세요 (0 이상)');
+                hasError = true;
+            }
+
+            // 에러가 있으면 계산 중단
+            if (hasError) {
+                return;
+            }
+
+            // 파싱
+            const C2 = parseFloat(removeCommas(jeonseValue));
+            const C7 = parseFloat(removeCommas(damagedValue));
+            const C8 = parseFloat(removeCommas(dividendValue));
+            const C13 = C7; // 우대금리 적용금액 = 피해주택 임차보증금
+
+            // C3 계산: LH 전세지원금 = C2 - 입주자자본부담금
+            const C3 = C2 - CONSTANTS.CAPITAL_BURDEN;
+
+            // C9 계산: 보증금손실액 = C7 - C8
+            const C9 = C7 - C8;
+
+            // C17 계산: 우대금리 월임대료 = C13 × 우대금리 ÷ 12
+            const C17 = (C13 * CONSTANTS.EFFECTIVE_RATE) / CONSTANTS.MONTHS;
+
+            // C19 계산: 일반금리 월임대료 = (C3 - C7) × 기본이율 ÷ 12
+            const C19 = ((C3 - C7) * CONSTANTS.BASE_RATE) / CONSTANTS.MONTHS;
+
+            // 결과 업데이트
+            document.getElementById('lh').value = formatNumber(Math.round(C3));
+            document.getElementById('loss').value = formatNumber(Math.round(C9));
+            document.getElementById('preferential').value = formatNumber(Math.round(C13));
+            document.getElementById('preferentialRent').textContent = formatNumber(Math.round(C17)) + '원';
+            document.getElementById('normalRent').textContent = formatNumber(Math.round(C19)) + '원';
+            document.getElementById('lossAmount').textContent = formatNumber(Math.round(C9)) + '원';
+
+            // 결과 섹션 표시
+            document.getElementById('resultSection').style.display = 'block';
+
+            // 결과로 스크롤
+            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // 에러 표시 함수
+        function showError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errorMsg = document.getElementById(fieldId + '-error');
+            
+            field.classList.add('error');
+            if (errorMsg) {
+                errorMsg.textContent = message;
+                errorMsg.classList.add('show');
+            }
+        }
+
+        // 에러 초기화 함수
+        function clearErrors() {
+            const fields = ['jeonse', 'damaged', 'dividend'];
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                const errorMsg = document.getElementById(fieldId + '-error');
+                
+                field.classList.remove('error');
+                if (errorMsg) {
+                    errorMsg.classList.remove('show');
+                }
+            });
+        }
+
+        // 입력 시 에러 제거
+        ['jeonse', 'damaged', 'dividend'].forEach(fieldId => {
+            document.getElementById(fieldId).addEventListener('input', function() {
+                this.classList.remove('error');
+                const errorMsg = document.getElementById(fieldId + '-error');
+                if (errorMsg) {
+                    errorMsg.classList.remove('show');
+                }
+            });
+        });
+
+        // 실시간 계산 함수
+        function updateAutoCalculations() {
+            const C2Value = document.getElementById('jeonse').value.trim();
+            const C7Value = document.getElementById('damaged').value.trim();
+            const C8Value = document.getElementById('dividend').value.trim();
+
+            // 전세보증금 입력 시 LH 전세지원금 계산
+            if (C2Value && !isNaN(removeCommas(C2Value))) {
+                const C2 = parseFloat(removeCommas(C2Value));
+                const C3 = C2 - CONSTANTS.CAPITAL_BURDEN;
+                document.getElementById('lh').value = formatNumber(Math.round(C3));
+            }
+
+            // 피해주택 임차보증금 입력 시 우대금리 적용금액 계산
+            if (C7Value && !isNaN(removeCommas(C7Value))) {
+                const C7 = parseFloat(removeCommas(C7Value));
+                document.getElementById('preferential').value = formatNumber(Math.round(C7));
+            }
+
+            // 피해주택 임차보증금과 배당금이 모두 있을 때 보증금손실액 계산
+            if (C7Value && C8Value && !isNaN(removeCommas(C7Value)) && !isNaN(removeCommas(C8Value))) {
+                const C7 = parseFloat(removeCommas(C7Value));
+                const C8 = parseFloat(removeCommas(C8Value));
+                const C9 = C7 - C8;
+                document.getElementById('loss').value = formatNumber(Math.round(C9));
+            }
+        }
+
+        // blur 이벤트 리스너 추가
+        document.getElementById('jeonse').addEventListener('blur', updateAutoCalculations);
+        document.getElementById('damaged').addEventListener('blur', updateAutoCalculations);
+        document.getElementById('dividend').addEventListener('blur', updateAutoCalculations);
+
+        // Enter 키로 계산
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                calculate();
+            }
+        });
+    </script>
+</body>
+</html>

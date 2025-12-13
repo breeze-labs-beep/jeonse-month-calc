@@ -424,8 +424,13 @@
                     <div class="result-value" id="normalRent">0원</div>
                 </div>
 
-                <div class="result-notice">
-                    * 우대금리 임대료는 보증금손실액(<span class="amount" id="lossAmount">0원</span>)이 소진될 때까지 부과되지 않습니다.
+                <div class="result-item">
+                    <div class="result-label">* 우대금리 임대료는 보증금손실액(<span class="amount" id="lossAmount">0원</span>)이 소진될 때까지 부과되지 않습니다.</div>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-label">보증금손실액 소진까지 필요한 거주기간</div>
+                    <div class="result" id="resultResidencePeriod">0년 (0개월)</div>
                 </div>
             </div>
 
@@ -575,6 +580,15 @@
             // C19 계산: 일반금리 월임대료 = (전세보증금 - 우대금리 적용금액) × 기본이율 ÷ 12
             const C19 = ((C2 - C13) * CONSTANTS.BASE_RATE) / CONSTANTS.MONTHS;
 
+            // 거주기간 계산: 보증금손실액 / 우대금리 월임대료
+            let residencePeriodText = '0년 (0.00개월)';
+            if (C9 > 0 && C17 > 0) {
+                const totalMonths = C9 / C17;
+                const years = (totalMonths / 12).toFixed(2);
+                const months = totalMonths.toFixed(2);
+                residencePeriodText = `${years}년 (${months}개월)`;
+            }
+
             // 결과 업데이트
             document.getElementById('lh').value = formatNumber(Math.round(C3));
             document.getElementById('loss').value = formatNumber(Math.round(C9));
@@ -583,6 +597,7 @@
             document.getElementById('preferentialRent').textContent = formatNumber(Math.round(C17)) + '원';
             document.getElementById('normalRent').textContent = formatNumber(Math.round(C19)) + '원';
             document.getElementById('lossAmount').textContent = formatNumber(Math.round(C9)) + '원';
+            document.getElementById('resultResidencePeriod').textContent = residencePeriodText;
 
             // 결과 섹션 표시
             document.getElementById('resultSection').style.display = 'block';

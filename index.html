@@ -325,7 +325,7 @@
                 </div>
 
                 <div class="input-group">
-                    <label class="input-label">입주자자본부담금 (고정값)</label>
+                    <label class="input-label">입주자 자본 부담금 (고정값)</label>
                     <div class="input-wrapper">
                         <input type="text" id="capital" class="input-field" disabled value="2,000,000">
                         <span class="unit">원</span>
@@ -400,7 +400,7 @@
 
             <div class="info-box" id="info-box">
                 <strong>📌 계산식 안내</strong>
-                • LH 전세지원금 = 전세보증금 - 입주자자본부담금<br>
+                • LH 전세지원금 = 전세보증금 - 입주자 자본 부담금<br>
                 • 보증금손실액 = 피해주택 임차보증금 - 배당금<br>
                 • 우대금리 월임대료 = 우대금리 물량대출 기준금액 × 1.7% ÷ 12<br>
                 &nbsp;&nbsp;(기본이율 2.2% - 추대금리 0.5% = 1.7%)<br>
@@ -412,7 +412,7 @@
     <script>
         // ===== 상수 정의 =====
         const CONSTANTS = {
-            CAPITAL_BURDEN: 2000000,           // 입주자자본부담금
+            CAPITAL_BURDEN: 2000000,           // 입주자 자본 부담금
             BASE_RATE: 0.022,                   // 기본이율 2.2%
             PREFERENTIAL_RATE: 0.005,           // 추대금리 0.5%
             EFFECTIVE_RATE: 0.017,              // 우대금리 (2.2% - 0.5% = 1.7%)
@@ -441,7 +441,7 @@
 
             document.getElementById('info-box').innerHTML = `
                 <strong>📌 계산식 안내</strong>
-                • LH 전세지원금 = 전세보증금 - 입주자자본부담금<br>
+                • LH 전세지원금 = 전세보증금 - 입주자 자본 부담금<br>
                 • 보증금손실액 = 피해주택 임차보증금 - 배당금<br>
                 • 우대금리 월임대료 = 우대금리 물량대출 기준금액 × ${effectiveRatePercent}% ÷ ${CONSTANTS.MONTHS}<br>
                 &nbsp;&nbsp;(기본이율 ${baseRatePercent}% - 우대금리 ${preferentialRatePercent}% = ${effectiveRatePercent}%)<br>

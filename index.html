@@ -43,7 +43,7 @@
             margin-bottom: 10px;
         }
 
-        .header h2 {
+        .header h1 {
             font-size: 24px;
             margin-bottom: 10px;
         }
@@ -303,7 +303,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>LH전세임대 월임대료 계산기</h1>
+            <h1>LH전세임대 월임대료 계산기 v0.2</h1>
             <h2>[참고용]</h2>
             <p>간편하게 월임대료를 계산해보세요</p>
             <div class="credits">
@@ -313,6 +313,28 @@
         </div>
 
         <div class="content">
+            <!-- LH 전세지원금 정보 -->
+            <div class="section">
+                <div class="section-title">LH 전세지원금 정보</div>
+                
+                <div class="input-group">
+                    <label class="input-label">피해주택 임차보증금</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="damaged" class="input-field" placeholder="예: 100,000,000" value="">
+                        <span class="unit">원</span>
+                    </div>
+                    <div class="error-message" id="damaged-error">피해주택 임차보증금을 입력해주세요</div>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">지원한도액 (자동계산)</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="maxLhSupport" class="input-field" disabled value="">
+                        <span class="unit">원</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- 전세임대 정보 -->
             <div class="section">
                 <div class="section-title">전세임대 정보</div>
@@ -341,21 +363,20 @@
                         <span class="unit">원</span>
                     </div>
                 </div>
+
+                <div class="input-group" style="display: none;">
+                    <label class="input-label">개인 부담금 (자동계산)</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="personalBurden" class="input-field" disabled value="">
+                        <span class="unit">원</span>
+                    </div>
+                </div>
             </div>
 
             <!-- 피해주택 정보 -->
             <div class="section">
                 <div class="section-title">피해주택 정보</div>
                 
-                <div class="input-group">
-                    <label class="input-label">피해주택 임차보증금</label>
-                    <div class="input-wrapper">
-                        <input type="text" id="damaged" class="input-field" placeholder="예: 100,000,000" value="">
-                        <span class="unit">원</span>
-                    </div>
-                    <div class="error-message" id="damaged-error">피해주택 임차보증금을 입력해주세요</div>
-                </div>
-
                 <div class="input-group">
                     <label class="input-label">배당금</label>
                     <div class="input-wrapper">
@@ -410,7 +431,7 @@
 
             <div class="info-box" id="info-box">
                 <strong>📌 계산식 안내</strong>
-                • LH 전세지원금 = 전세보증금 - 입주자 자본 부담금<br>
+                • LH 전세지원금 = 전세보증금 - 입주자자본부담금<br>
                 • 보증금손실액 = 피해주택 임차보증금 - 배당금<br>
                 • 우대금리 월임대료 = 우대금리 물량대출 기준금액 × 1.7% ÷ 12<br>
                 &nbsp;&nbsp;(기본이율 2.2% - 추대금리 0.5% = 1.7%)<br>
@@ -426,7 +447,8 @@
             BASE_RATE: 0.022,                   // 기본이율 2.2%
             PREFERENTIAL_RATE: 0.005,           // 추대금리 0.5%
             EFFECTIVE_RATE: 0.017,              // 우대금리 (2.2% - 0.5% = 1.7%)
-            MONTHS: 12                          // 월 수
+            MONTHS: 12,                         // 월 수
+            MAX_LH_SUPPORT_LIMIT: 240000000    // 지원한도액 한도 (2.4억)
         };
 
         // 숫자 포맷팅 함수
@@ -441,7 +463,7 @@
 
         // 페이지 로드 시 고정값 및 안내 텍스트 설정
         window.addEventListener('DOMContentLoaded', function() {
-            // 입주자자본부담금 고정값 설정
+            // 입주자 자본 부담금 고정값 설정
             document.getElementById('capital').value = formatNumber(CONSTANTS.CAPITAL_BURDEN);
 
             // 안내 텍스트 동적 생성
@@ -451,11 +473,12 @@
 
             document.getElementById('info-box').innerHTML = `
                 <strong>📌 계산식 안내</strong>
-                • LH 전세지원금 = 전세보증금 - 입주자 자본 부담금<br>
+                • 지원한도액 = 피해주택 임차보증금이 2.4억 이하면 2.4억, 초과면 피해주택 임차보증금<br>
+                • LH 전세지원금 = (전세보증금과 지원한도액 중 작은 금액) - 입주자 자본 부담금<br>
                 • 보증금손실액 = 피해주택 임차보증금 - 배당금<br>
-                • 우대금리 월임대료 = 우대금리 물량대출 기준금액 × ${effectiveRatePercent}% ÷ ${CONSTANTS.MONTHS}<br>
+                • 우대금리 월임대료 = <span class="highlight">우대금리 물량대출 기준금액</span> × ${effectiveRatePercent}% ÷ ${CONSTANTS.MONTHS}<br>
                 &nbsp;&nbsp;(기본이율 ${baseRatePercent}% - 우대금리 ${preferentialRatePercent}% = ${effectiveRatePercent}%)<br>
-                • 일반금리 월임대료 = (LH지원금 - 피해주택 임차보증금) × ${baseRatePercent}% ÷ ${CONSTANTS.MONTHS}
+                • 일반금리 월임대료 = (전세보증금 - <span class="highlight">우대금리 물량대출 기준금액</span>) × ${baseRatePercent}% ÷ ${CONSTANTS.MONTHS}
             `;
         });
 
@@ -528,8 +551,20 @@
             const C8 = parseFloat(removeCommas(dividendValue));
             const C13 = C7; // 우대금리 적용금액 = 피해주택 임차보증금
 
-            // C3 계산: LH 전세지원금 = C2 - 입주자자본부담금
-            const C3 = C2 - CONSTANTS.CAPITAL_BURDEN;
+            // 지원한도액 계산
+            let maxLhSupport;
+            if (C7 <= CONSTANTS.MAX_LH_SUPPORT_LIMIT) {
+                maxLhSupport = CONSTANTS.MAX_LH_SUPPORT_LIMIT;
+            } else {
+                maxLhSupport = C7;
+            }
+
+            // C3 계산: LH 전세지원금 = MIN(전세보증금, 지원한도액) - 입주자 자본 부담금
+            const minValue = Math.min(C2, maxLhSupport);
+            const C3 = minValue - CONSTANTS.CAPITAL_BURDEN;
+
+            // 개인 부담금 계산
+            const personalBurden = C2 - C3;
 
             // C9 계산: 보증금손실액 = C7 - C8
             const C9 = C7 - C8;
@@ -537,13 +572,14 @@
             // C17 계산: 우대금리 월임대료 = C13 × 우대금리 ÷ 12
             const C17 = (C13 * CONSTANTS.EFFECTIVE_RATE) / CONSTANTS.MONTHS;
 
-            // C19 계산: 일반금리 월임대료 = (C3 - C7) × 기본이율 ÷ 12
-            const C19 = ((C3 - C7) * CONSTANTS.BASE_RATE) / CONSTANTS.MONTHS;
+            // C19 계산: 일반금리 월임대료 = (전세보증금 - 우대금리 적용금액) × 기본이율 ÷ 12
+            const C19 = ((C2 - C13) * CONSTANTS.BASE_RATE) / CONSTANTS.MONTHS;
 
             // 결과 업데이트
             document.getElementById('lh').value = formatNumber(Math.round(C3));
             document.getElementById('loss').value = formatNumber(Math.round(C9));
             document.getElementById('preferential').value = formatNumber(Math.round(C13));
+            document.getElementById('personalBurden').value = formatNumber(Math.round(personalBurden));
             document.getElementById('preferentialRent').textContent = formatNumber(Math.round(C17)) + '원';
             document.getElementById('normalRent').textContent = formatNumber(Math.round(C19)) + '원';
             document.getElementById('lossAmount').textContent = formatNumber(Math.round(C9)) + '원';
@@ -598,11 +634,51 @@
             const C7Value = document.getElementById('damaged').value.trim();
             const C8Value = document.getElementById('dividend').value.trim();
 
-            // 전세보증금 입력 시 LH 전세지원금 계산
+            // 피해주택 임차보증금 입력 시 지원한도액 계산
+            let maxLhSupport = 0;
+            if (C7Value && !isNaN(removeCommas(C7Value))) {
+                const C7 = parseFloat(removeCommas(C7Value));
+                
+                if (C7 <= CONSTANTS.MAX_LH_SUPPORT_LIMIT) {
+                    // 2.4억 이하인 경우 → 2.4억
+                    maxLhSupport = CONSTANTS.MAX_LH_SUPPORT_LIMIT;
+                } else {
+                    // 2.4억 초과인 경우 → 피해주택 임차보증금
+                    maxLhSupport = C7;
+                }
+                
+                document.getElementById('maxLhSupport').value = formatNumber(Math.round(maxLhSupport));
+            } else {
+                // 피해주택 임차보증금이 없으면 지원한도액도 비움
+                document.getElementById('maxLhSupport').value = '';
+            }
+
+            // LH 전세지원금 및 개인 부담금 계산
+            // 전세보증금과 지원한도액이 모두 있을 때만 계산
             if (C2Value && !isNaN(removeCommas(C2Value))) {
                 const C2 = parseFloat(removeCommas(C2Value));
-                const C3 = C2 - CONSTANTS.CAPITAL_BURDEN;
-                document.getElementById('lh').value = formatNumber(Math.round(C3));
+                const maxLhSupportValue = document.getElementById('maxLhSupport').value.trim();
+                
+                if (maxLhSupportValue && !isNaN(removeCommas(maxLhSupportValue))) {
+                    const maxLh = parseFloat(removeCommas(maxLhSupportValue));
+                    
+                    // LH 전세지원금: MIN(전세보증금, 지원한도액) - 입주자 자본 부담금
+                    const minValue = Math.min(C2, maxLh);
+                    const C3 = minValue - CONSTANTS.CAPITAL_BURDEN;
+                    document.getElementById('lh').value = formatNumber(Math.round(C3));
+                    
+                    // 개인 부담금: 전세보증금 - LH 전세지원금
+                    const personalBurden = C2 - C3;
+                    document.getElementById('personalBurden').value = formatNumber(Math.round(personalBurden));
+                } else {
+                    // 지원한도액이 없으면 비움
+                    document.getElementById('lh').value = '';
+                    document.getElementById('personalBurden').value = '';
+                }
+            } else {
+                // 전세보증금이 없으면 비움
+                document.getElementById('lh').value = '';
+                document.getElementById('personalBurden').value = '';
             }
 
             // 피해주택 임차보증금 입력 시 우대금리 적용금액 계산

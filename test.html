@@ -303,7 +303,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>LH전세임대 월임대료 계산기 v0.2</h1>
+            <h1>LH전세임대 월임대료 계산기 v0.3</h1>
             <h2>[참고용]</h2>
             <p>간편하게 월임대료를 계산해보세요</p>
             <div class="credits">
@@ -364,7 +364,7 @@
                     </div>
                 </div>
 
-                <div class="input-group" style="display: none;">
+                <div class="input-group">
                     <label class="input-label">개인 부담금 (자동계산)</label>
                     <div class="input-wrapper">
                         <input type="text" id="personalBurden" class="input-field" disabled value="">
@@ -409,6 +409,8 @@
             </div>
 
             <button class="calculate-btn" onclick="calculate()">💡 계산하기</button>
+            
+            <button id="shareButton" class="calculate-btn" style="display: none; margin-top: 10px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">🔗 공유 URL 복사</button>
 
             <!-- 월 임대료 결과 -->
             <div class="result-section" id="resultSection" style="display: none;">
@@ -466,25 +468,89 @@
             return str.replace(/,/g, '');
         }
 
-        // 페이지 로드 시 고정값 및 안내 텍스트 설정
-        window.addEventListener('DOMContentLoaded', function() {
-            // 입주자 자본 부담금 고정값 설정
-            document.getElementById('capital').value = formatNumber(CONSTANTS.CAPITAL_BURDEN);
+        // 데이터 암호화 함수 (Base64 인코딩)
+        function encryptData(jeonse, damaged, dividend) {
+            const data = `${jeonse},${damaged},${dividend}`;
+            return btoa(data);
+        }
 
-            // 안내 텍스트 동적 생성
+        // 데이터 복호화 함수 (Base64 디코딩)
+        function decryptData(encryptedData) {
+            try {
+                const data = atob(encryptedData);
+                const values = data.split(',');
+                if (values.length === 3) {
+                    return {
+                        jeonse: values[0],
+                        damaged: values[1],
+                        dividend: values[2]
+                    };
+                }
+            } catch (e) {
+                console.error('데이터 복호화 오류:', e);
+            }
+            return null;
+        }
+
+        // URL에서 쿼리 파라미터 가져오기
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // 공유 URL 생성
+        function generateShareUrl() {
+            const jeonse = removeCommas(document.getElementById('jeonse').value.trim());
+            const damaged = removeCommas(document.getElementById('damaged').value.trim());
+            const dividend = removeCommas(document.getElementById('dividend').value.trim());
+            
+            if (jeonse && damaged && dividend) {
+                const encryptedData = encryptData(jeonse, damaged, dividend);
+                const baseUrl = window.location.origin + window.location.pathname;
+                return `${baseUrl}?data=${encodeURIComponent(encryptedData)}`;
+            }
+            return null;
+        }
+
+        // 안내 텍스트 업데이트 함수
+        function updateInfoBox() {
             const baseRatePercent = (CONSTANTS.BASE_RATE * 100).toFixed(1);
             const preferentialRatePercent = (CONSTANTS.PREFERENTIAL_RATE * 100).toFixed(1);
             const effectiveRatePercent = (CONSTANTS.EFFECTIVE_RATE * 100).toFixed(1);
 
             document.getElementById('info-box').innerHTML = `
                 <strong>📌 계산식 안내</strong>
-                • 지원한도액 = 피해주택 임차보증금이 2.4억 이하면 2.4억, 초과면 피해주택 임차보증금<br>
-                • LH 전세지원금 = (전세보증금과 지원한도액 중 작은 금액) - 입주자 자본 부담금<br>
+                • 지원한도액 = 피해주택 임차보증금이 2.4억 이하면 2.4억, 초과하면 피해주택 임차보증금<br>
+                • LH 전세지원금 = (전세보증금과 지원한도액 중 작은 금액) - 입주자자본부담금<br>
+                • 개인 부담금 = 전세보증금 - LH 전세지원금<br>
                 • 보증금손실액 = 피해주택 임차보증금 - 배당금<br>
                 • 우대금리 월임대료 = <span class="highlight">우대금리 물량대출 기준금액</span> × ${effectiveRatePercent}% ÷ ${CONSTANTS.MONTHS}<br>
                 &nbsp;&nbsp;(기본이율 ${baseRatePercent}% - 우대금리 ${preferentialRatePercent}% = ${effectiveRatePercent}%)<br>
-                • 일반금리 월임대료 = (전세보증금 - <span class="highlight">우대금리 물량대출 기준금액</span>) × ${baseRatePercent}% ÷ ${CONSTANTS.MONTHS}
+                • 일반금리 월임대료 = (전세보증금 - 우대금리 적용금액) × ${baseRatePercent}% ÷ ${CONSTANTS.MONTHS}
             `;
+        }
+
+        // 페이지 로드 시 고정값 및 안내 텍스트 설정
+        window.addEventListener('DOMContentLoaded', function() {
+            // 입주자 자본 부담금 고정값 설정
+            document.getElementById('capital').value = formatNumber(CONSTANTS.CAPITAL_BURDEN);
+
+            // 쿼리 파라미터에서 데이터 로드
+            const encryptedData = getQueryParam('data');
+            if (encryptedData) {
+                const decryptedData = decryptData(encryptedData);
+                if (decryptedData) {
+                    document.getElementById('jeonse').value = formatNumber(decryptedData.jeonse);
+                    document.getElementById('damaged').value = formatNumber(decryptedData.damaged);
+                    document.getElementById('dividend').value = formatNumber(decryptedData.dividend);
+                    
+                    // 자동 계산 실행
+                    updateAutoCalculations();
+                }
+            }
+
+            // 안내 텍스트 초기 설정
+            updateInfoBox();
         });
 
         // 입력 필드에 자동 포맷팅 적용
@@ -599,11 +665,43 @@
             document.getElementById('lossAmount').textContent = formatNumber(Math.round(C9)) + '원';
             document.getElementById('resultResidencePeriod').textContent = residencePeriodText;
 
+            // 계산 예시를 안내 박스에 추가
+            const baseRatePercent = (CONSTANTS.BASE_RATE * 100).toFixed(1);
+            const preferentialRatePercent = (CONSTANTS.PREFERENTIAL_RATE * 100).toFixed(1);
+            const effectiveRatePercent = (CONSTANTS.EFFECTIVE_RATE * 100).toFixed(1);
+            
+            const exampleText = `
+                <div style="margin-top: 15px; padding: 10px; background-color: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px;">
+                    <strong>📊 현재 입력값 기준 계산 예시</strong><br>
+                    • 지원한도액 = ${C7 <= CONSTANTS.MAX_LH_SUPPORT_LIMIT ? formatNumber(CONSTANTS.MAX_LH_SUPPORT_LIMIT) : formatNumber(C7)}원<br>
+                    • LH 전세지원금 = (${formatNumber(C2)}과 ${formatNumber(maxLhSupport)} 중 작은 금액) - ${formatNumber(CONSTANTS.CAPITAL_BURDEN)} = <strong>${formatNumber(C3)}원</strong><br>
+                    • 개인 부담금 = ${formatNumber(C2)} - ${formatNumber(C3)} = <strong>${formatNumber(personalBurden)}원</strong><br>
+                    • 보증금손실액 = ${formatNumber(C7)} - ${formatNumber(C8)} = <strong>${formatNumber(C9)}원</strong><br>
+                    • 우대금리 월임대료 = ${formatNumber(C7)} × ${effectiveRatePercent}% ÷ 12 = <strong>${formatNumber(Math.round(C17))}원</strong><br>
+                    • 일반금리 월임대료 = (${formatNumber(C2)} - ${formatNumber(C7)}) × ${baseRatePercent}% ÷ 12 = <strong>${formatNumber(Math.round(C19))}원</strong>
+                </div>
+            `;
+            
+            document.getElementById('info-box').innerHTML = `
+                <strong>📌 계산식 안내</strong>
+                • 지원한도액 = 피해주택 임차보증금이 2.4억 이하면 2.4억, 초과하면 피해주택 임차보증금<br>
+                • LH 전세지원금 = (전세보증금과 지원한도액 중 작은 금액) - 입주자자본부담금<br>
+                • 개인 부담금 = 전세보증금 - LH 전세지원금<br>
+                • 보증금손실액 = 피해주택 임차보증금 - 배당금<br>
+                • 우대금리 월임대료 = <span class="highlight">우대금리 물량대출 기준금액</span> × ${effectiveRatePercent}% ÷ ${CONSTANTS.MONTHS}<br>
+                &nbsp;&nbsp;(기본이율 ${baseRatePercent}% - 우대금리 ${preferentialRatePercent}% = ${effectiveRatePercent}%)<br>
+                • 일반금리 월임대료 = (전세보증금 - 우대금리 적용금액) × ${baseRatePercent}% ÷ ${CONSTANTS.MONTHS}
+                ${exampleText}
+            `;
+
             // 결과 섹션 표시
             document.getElementById('resultSection').style.display = 'block';
 
             // 결과로 스크롤
             document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            // 공유 URL 업데이트
+            updateShareUrl();
         }
 
         // 에러 표시 함수
@@ -715,6 +813,24 @@
         document.getElementById('jeonse').addEventListener('blur', updateAutoCalculations);
         document.getElementById('damaged').addEventListener('blur', updateAutoCalculations);
         document.getElementById('dividend').addEventListener('blur', updateAutoCalculations);
+
+        // 공유 URL 업데이트 함수
+        function updateShareUrl() {
+            const shareUrl = generateShareUrl();
+            const shareButton = document.getElementById('shareButton');
+            if (shareUrl && shareButton) {
+                shareButton.style.display = 'block';
+                shareButton.onclick = function() {
+                    navigator.clipboard.writeText(shareUrl).then(function() {
+                        alert('공유 URL이 클립보드에 복사되었습니다!');
+                    }).catch(function() {
+                        prompt('아래 URL을 복사하세요:', shareUrl);
+                    });
+                };
+            } else if (shareButton) {
+                shareButton.style.display = 'none';
+            }
+        }
 
         // Enter 키로 계산
         document.addEventListener('keypress', function(e) {

@@ -93,7 +93,7 @@
         .section-title {
             font-size: 18px;
             font-weight: bold;
-            color: #333;
+            color: white;
             margin-bottom: 15px;
             display: flex;
             align-items: center;
@@ -179,6 +179,14 @@
 
         .result-section {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 0px;
+            margin-top: 30px;
+        }
+
+        .burden-section {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
             color: white;
             padding: 25px;
             border-radius: 0px;
@@ -365,7 +373,7 @@
                 </div>
 
                 <div class="input-group">
-                    <label class="input-label">개인 부담금 (자동계산)</label>
+                    <label class="input-label">별도 부담금(전세임대주택 보증금 - 지원한도액) (자동계산)</label>
                     <div class="input-wrapper">
                         <input type="text" id="personalBurden" class="input-field" disabled value="">
                         <span class="unit">원</span>
@@ -412,8 +420,28 @@
             
             <button id="shareButton" class="calculate-btn" style="display: none; margin-top: 10px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">🔗 공유 URL 복사</button>
 
+            <!-- 부담금 결과 -->
+            <div class="burden-section" id="burdenSection" style="display: none;">
+                <div class="section-title">부담금</div>
+                
+                <div class="result-item">
+                    <div class="result-label">입주자 자본 부담금</div>
+                    <div class="result-value" id="capitalBurdenResult">0원</div>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-label">별도 부담금<br><small>전세임대주택 보증금 - 지원한도액</small></div>
+                    <div class="result-value" id="separateBurdenResult">0원</div>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-label">합계<br><small>입주자 자본 부담금 + 별도 부담금</small></div>
+                    <div class="result-value" id="totalBurdenResult">0원</div>
+                </div>
+            </div>
+
             <!-- 월 임대료 결과 -->
-            <div class="result-section" id="resultSection" style="display: none;">
+            <div class="result-section" id="rentSection" style="display: none;">
                 <div class="section-title">월 임대료</div>
                 
                 <div class="result-item">
@@ -438,7 +466,7 @@
 
             <div class="info-box" id="info-box">
                 <strong>📌 계산식 안내</strong>
-                • LH 전세지원금 = 전세보증금 - 입주자자본부담금<br>
+                • LH 전세지원금 = 전세보증금 - 입주자 자본 부담금<br>
                 • 보증금손실액 = 피해주택 임차보증금 - 배당금<br>
                 • 우대금리 월임대료 = 우대금리 물량대출 기준금액 × 1.7% ÷ 12<br>
                 &nbsp;&nbsp;(기본이율 2.2% - 추대금리 0.5% = 1.7%)<br>
@@ -521,8 +549,8 @@
             document.getElementById('info-box').innerHTML = `
                 <strong>📌 계산식 안내</strong>
                 • 지원한도액 = 피해주택 임차보증금이 2.4억 이하면 2.4억, 초과하면 피해주택 임차보증금<br>
-                • LH 전세지원금 = (전세보증금과 지원한도액 중 작은 금액) - 입주자자본부담금<br>
-                • 개인 부담금 = 전세보증금 - LH 전세지원금<br>
+                • LH 전세지원금 = (전세보증금과 지원한도액 중 작은 금액) - 입주자 자본 부담금<br>
+                • 별도 부담금 = 전세임대주택 보증금 - 지원한도액<br>
                 • 보증금손실액 = 피해주택 임차보증금 - 배당금<br>
                 • 우대금리 월임대료 = <span class="highlight">우대금리 물량대출 기준금액</span> × ${effectiveRatePercent}% ÷ ${CONSTANTS.MONTHS}<br>
                 &nbsp;&nbsp;(기본이율 ${baseRatePercent}% - 우대금리 ${preferentialRatePercent}% = ${effectiveRatePercent}%)<br>
@@ -634,8 +662,8 @@
             const minValue = Math.min(C2, maxLhSupport);
             const C3 = minValue - CONSTANTS.CAPITAL_BURDEN;
 
-            // 개인 부담금 계산
-            const personalBurden = C2 - C3;
+            // 별도 부담금 계산 (전세임대주택 보증금 - 지원한도액)
+            const personalBurden = Math.max(0, C2 - maxLhSupport);
 
             // C9 계산: 보증금손실액 = C7 - C8
             const C9 = C7 - C8;
@@ -664,6 +692,12 @@
             document.getElementById('normalRent').textContent = formatNumber(Math.round(C19)) + '원';
             document.getElementById('lossAmount').textContent = formatNumber(Math.round(C9)) + '원';
             document.getElementById('resultResidencePeriod').textContent = residencePeriodText;
+            
+            // 부담금 결과 업데이트
+            const totalBurden = CONSTANTS.CAPITAL_BURDEN + personalBurden;
+            document.getElementById('capitalBurdenResult').textContent = formatNumber(CONSTANTS.CAPITAL_BURDEN) + '원';
+            document.getElementById('separateBurdenResult').textContent = formatNumber(Math.round(personalBurden)) + '원';
+            document.getElementById('totalBurdenResult').textContent = formatNumber(Math.round(totalBurden)) + '원';
 
             // 계산 예시를 안내 박스에 추가
             const baseRatePercent = (CONSTANTS.BASE_RATE * 100).toFixed(1);
@@ -675,7 +709,7 @@
                     <strong>📊 현재 입력값 기준 계산 예시</strong><br>
                     • 지원한도액 = ${C7 <= CONSTANTS.MAX_LH_SUPPORT_LIMIT ? formatNumber(CONSTANTS.MAX_LH_SUPPORT_LIMIT) : formatNumber(C7)}원<br>
                     • LH 전세지원금 = (${formatNumber(C2)}과 ${formatNumber(maxLhSupport)} 중 작은 금액) - ${formatNumber(CONSTANTS.CAPITAL_BURDEN)} = <strong>${formatNumber(C3)}원</strong><br>
-                    • 개인 부담금 = ${formatNumber(C2)} - ${formatNumber(C3)} = <strong>${formatNumber(personalBurden)}원</strong><br>
+                    • 별도 부담금 = ${formatNumber(C2)} - ${formatNumber(maxLhSupport)} = <strong>${formatNumber(personalBurden)}원</strong><br>
                     • 보증금손실액 = ${formatNumber(C7)} - ${formatNumber(C8)} = <strong>${formatNumber(C9)}원</strong><br>
                     • 우대금리 월임대료 = ${formatNumber(C7)} × ${effectiveRatePercent}% ÷ 12 = <strong>${formatNumber(Math.round(C17))}원</strong><br>
                     • 일반금리 월임대료 = (${formatNumber(C2)} - ${formatNumber(C7)}) × ${baseRatePercent}% ÷ 12 = <strong>${formatNumber(Math.round(C19))}원</strong>
@@ -685,8 +719,8 @@
             document.getElementById('info-box').innerHTML = `
                 <strong>📌 계산식 안내</strong>
                 • 지원한도액 = 피해주택 임차보증금이 2.4억 이하면 2.4억, 초과하면 피해주택 임차보증금<br>
-                • LH 전세지원금 = (전세보증금과 지원한도액 중 작은 금액) - 입주자자본부담금<br>
-                • 개인 부담금 = 전세보증금 - LH 전세지원금<br>
+                • LH 전세지원금 = (전세보증금과 지원한도액 중 작은 금액) - 입주자 자본 부담금<br>
+                • 별도 부담금 = 전세임대주택 보증금 - 지원한도액<br>
                 • 보증금손실액 = 피해주택 임차보증금 - 배당금<br>
                 • 우대금리 월임대료 = <span class="highlight">우대금리 물량대출 기준금액</span> × ${effectiveRatePercent}% ÷ ${CONSTANTS.MONTHS}<br>
                 &nbsp;&nbsp;(기본이율 ${baseRatePercent}% - 우대금리 ${preferentialRatePercent}% = ${effectiveRatePercent}%)<br>
@@ -695,10 +729,11 @@
             `;
 
             // 결과 섹션 표시
-            document.getElementById('resultSection').style.display = 'block';
+            document.getElementById('burdenSection').style.display = 'block';
+            document.getElementById('rentSection').style.display = 'block';
 
             // 결과로 스크롤
-            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            document.getElementById('burdenSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             
             // 공유 URL 업데이트
             updateShareUrl();
@@ -780,8 +815,8 @@
                     const C3 = minValue - CONSTANTS.CAPITAL_BURDEN;
                     document.getElementById('lh').value = formatNumber(Math.round(C3));
                     
-                    // 개인 부담금: 전세보증금 - LH 전세지원금
-                    const personalBurden = C2 - C3;
+                    // 별도 부담금: 전세임대주택 보증금 - 지원한도액
+                    const personalBurden = Math.max(0, C2 - maxLh);
                     document.getElementById('personalBurden').value = formatNumber(Math.round(personalBurden));
                 } else {
                     // 지원한도액이 없으면 비움

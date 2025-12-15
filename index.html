@@ -699,8 +699,8 @@
             document.getElementById('loss').value = formatNumber(Math.round(C9));
             document.getElementById('preferential').value = formatNumber(Math.round(C13));
             document.getElementById('personalBurden').value = formatNumber(Math.round(personalBurden));
-            document.getElementById('preferentialRent').textContent = formatNumber(Math.round(C17)) + '원';
-            document.getElementById('normalRent').textContent = formatNumber(Math.round(C19)) + '원';
+            document.getElementById('preferentialRent').textContent = formatNumber(Math.floor(C17)) + '원';
+            document.getElementById('normalRent').textContent = formatNumber(Math.floor(C19)) + '원';
             document.getElementById('lossAmount').textContent = formatNumber(Math.round(C9)) + '원';
             document.getElementById('resultResidencePeriod').textContent = residencePeriodText;
             
@@ -722,8 +722,8 @@
                     • LH 전세지원금 = (${formatNumber(C2)}과 ${formatNumber(maxLhSupport)} 중 작은 금액) - ${formatNumber(CONSTANTS.CAPITAL_BURDEN)} = <strong>${formatNumber(C3)}원</strong><br>
                     • 별도 부담금 = ${formatNumber(C2)} - ${formatNumber(maxLhSupport)} = <strong>${formatNumber(personalBurden)}원</strong><br>
                     • 보증금손실액 = ${formatNumber(C7)} - ${formatNumber(C8)} = <strong>${formatNumber(C9)}원</strong><br>
-                    • 우대금리 월임대료 = ${formatNumber(C7)} × ${effectiveRatePercent}% ÷ 12 = <strong>${formatNumber(Math.round(C17))}원</strong><br>
-                    • 일반금리 월임대료 = (${formatNumber(C3)} - ${formatNumber(C7)}) × ${baseRatePercent}% ÷ 12 = <strong>${formatNumber(Math.round(C19))}원</strong>
+                    • 우대금리 월임대료 = ${formatNumber(C7)} × ${effectiveRatePercent}% ÷ 12 = <strong>${formatNumber(Math.floor(C17))}원</strong><br>
+                    • 일반금리 월임대료 = (${formatNumber(C3)} - ${formatNumber(C7)}) × ${baseRatePercent}% ÷ 12 = <strong>${formatNumber(Math.floor(C19))}원</strong>
                 </div>
             `;
             

@@ -554,7 +554,7 @@
                 • 보증금손실액 = 피해주택 임차보증금 - 배당금<br>
                 • 우대금리 월임대료 = <span class="highlight">우대금리 물량대출 기준금액</span> × ${effectiveRatePercent}% ÷ ${CONSTANTS.MONTHS}<br>
                 &nbsp;&nbsp;(기본이율 ${baseRatePercent}% - 우대금리 ${preferentialRatePercent}% = ${effectiveRatePercent}%)<br>
-                • 일반금리 월임대료 = (전세보증금 - 우대금리 적용금액) × ${baseRatePercent}% ÷ ${CONSTANTS.MONTHS}
+                • 일반금리 월임대료 = (LH 전세지원금 - 우대금리 적용금액) × ${baseRatePercent}% ÷ ${CONSTANTS.MONTHS}
             `;
         }
 
@@ -671,8 +671,8 @@
             // C17 계산: 우대금리 월임대료 = C13 × 우대금리 ÷ 12
             const C17 = (C13 * CONSTANTS.EFFECTIVE_RATE) / CONSTANTS.MONTHS;
 
-            // C19 계산: 일반금리 월임대료 = (전세보증금 - 우대금리 적용금액) × 기본이율 ÷ 12
-            const C19 = ((C2 - C13) * CONSTANTS.BASE_RATE) / CONSTANTS.MONTHS;
+            // C19 계산: 일반금리 월임대료 = (LH 전세지원금 - 우대금리 적용금액) × 기본이율 ÷ 12
+            const C19 = Math.max(0, ((C3 - C13) * CONSTANTS.BASE_RATE) / CONSTANTS.MONTHS);
 
             // 거주기간 계산: 보증금손실액 / 우대금리 월임대료
             let residencePeriodText = '0년 (0.00개월)';
@@ -712,7 +712,7 @@
                     • 별도 부담금 = ${formatNumber(C2)} - ${formatNumber(maxLhSupport)} = <strong>${formatNumber(personalBurden)}원</strong><br>
                     • 보증금손실액 = ${formatNumber(C7)} - ${formatNumber(C8)} = <strong>${formatNumber(C9)}원</strong><br>
                     • 우대금리 월임대료 = ${formatNumber(C7)} × ${effectiveRatePercent}% ÷ 12 = <strong>${formatNumber(Math.round(C17))}원</strong><br>
-                    • 일반금리 월임대료 = (${formatNumber(C2)} - ${formatNumber(C7)}) × ${baseRatePercent}% ÷ 12 = <strong>${formatNumber(Math.round(C19))}원</strong>
+                    • 일반금리 월임대료 = (${formatNumber(C3)} - ${formatNumber(C7)}) × ${baseRatePercent}% ÷ 12 = <strong>${formatNumber(Math.round(C19))}원</strong>
                 </div>
             `;
             

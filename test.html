@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -151,9 +152,19 @@
         }
 
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
+            }
         }
 
         .error-message {
@@ -319,10 +330,11 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
-            <h1>LH전세임대 월임대료 계산기 v0.3</h1>
+            <h1>LH전세임대 월임대료 계산기 v0.4</h1>
             <h2>[참고용]</h2>
             <p>간편하게 월임대료를 계산해보세요</p>
             <div class="credits">
@@ -335,7 +347,7 @@
             <!-- LH 전세지원금 정보 -->
             <div class="section">
                 <div class="section-title">LH 전세지원금 정보</div>
-                
+
                 <div class="input-group">
                     <label class="input-label">피해주택 임차보증금</label>
                     <div class="input-wrapper">
@@ -346,7 +358,7 @@
                 </div>
 
                 <div class="input-group">
-                    <label class="input-label">지원한도액 (자동계산)</label>
+                    <label class="input-label">지원한도액 (최대6억) (자동계산)</label>
                     <div class="input-wrapper">
                         <input type="text" id="maxLhSupport" class="input-field" disabled value="">
                         <span class="unit">원</span>
@@ -357,9 +369,9 @@
             <!-- 전세임대 정보 -->
             <div class="section">
                 <div class="section-title">전세임대 정보</div>
-                
+
                 <div class="input-group">
-                    <label class="input-label">전세임대주택(집주인측)과의 전세보증금</label>
+                    <label class="input-label">전세임대주택(집주인측)과의 전세보증금 (최대6억)</label>
                     <div class="input-wrapper">
                         <input type="text" id="jeonse" class="input-field" placeholder="예: 230,000,000" value="">
                         <span class="unit">원</span>
@@ -395,7 +407,7 @@
             <!-- 피해주택 정보 -->
             <div class="section">
                 <div class="section-title">피해주택 정보</div>
-                
+
                 <div class="input-group">
                     <label class="input-label">배당금</label>
                     <div class="input-wrapper">
@@ -417,7 +429,7 @@
             <!-- 주거지원 정보 -->
             <div class="section">
                 <div class="section-title">주거지원 정보</div>
-                
+
                 <div class="input-group">
                     <label class="input-label">우대금리 적용금액 (<span class="highlight">우대금리 물량대출 기준금액</span>)</label>
                     <div class="input-wrapper">
@@ -428,13 +440,15 @@
             </div>
 
             <button class="calculate-btn" onclick="calculate()">💡 계산하기</button>
-            
-            <button id="shareButton" class="calculate-btn" style="display: none; margin-top: 10px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">🔗 공유 URL 복사</button>
+
+            <button id="shareButton" class="calculate-btn"
+                style="display: none; margin-top: 10px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">🔗
+                공유 URL 복사</button>
 
             <!-- 부담금 결과 -->
             <div class="burden-section" id="burdenSection" style="display: none;">
                 <div class="section-title">부담금</div>
-                
+
                 <div class="result-item">
                     <div class="result-label">입주자 자본 부담금</div>
                     <div class="result-value" id="capitalBurdenResult">0원</div>
@@ -454,9 +468,10 @@
             <!-- 월 임대료 결과 -->
             <div class="result-section" id="rentSection" style="display: none;">
                 <div class="section-title">월 임대료</div>
-                
+
                 <div class="result-item">
-                    <div class="result-label">우대금리 월임대료<br><small><span class="highlight">부과항목, 자금 또는 지원</span></small></div>
+                    <div class="result-label">우대금리 월임대료<br><small><span class="highlight">부과항목, 자금 또는 지원</span></small>
+                    </div>
                     <div class="result-value" id="preferentialRent">0원</div>
                 </div>
 
@@ -466,7 +481,8 @@
                 </div>
 
                 <div class="result-item">
-                    <div class="result-label">* 우대금리 임대료는 보증금손실액(<span class="amount" id="lossAmount">0원</span>)이 소진될 때까지 부과되지 않습니다.</div>
+                    <div class="result-label">* 우대금리 임대료는 보증금손실액(<span class="amount" id="lossAmount">0원</span>)이 소진될
+                        때까지 부과되지 않습니다.</div>
                 </div>
 
                 <div class="result-item">
@@ -494,7 +510,8 @@
             PREFERENTIAL_RATE: 0.005,           // 추대금리 0.5%
             EFFECTIVE_RATE: 0.017,              // 우대금리 (2.2% - 0.5% = 1.7%)
             MONTHS: 12,                         // 월 수
-            MAX_LH_SUPPORT_LIMIT: 240000000    // 지원한도액 한도 (2.4억)
+            MIN_LH_SUPPORT_LIMIT: 240000000,    // 지원한도액 최소 (2.4억)
+            MAX_LH_SUPPORT_LIMIT: 600000000     // 지원한도액 최대 (6억), 전세보증금 한도
         };
 
         // 숫자 포맷팅 함수
@@ -547,7 +564,7 @@
             const jeonse = removeCommas(document.getElementById('jeonse').value.trim());
             const damaged = removeCommas(document.getElementById('damaged').value.trim());
             const dividend = removeCommas(document.getElementById('dividend').value.trim());
-            
+
             if (jeonse && damaged && dividend) {
                 const encryptedData = encryptData(jeonse, damaged, dividend);
                 const baseUrl = window.location.origin + window.location.pathname;
@@ -564,7 +581,8 @@
 
             document.getElementById('info-box').innerHTML = `
                 <strong>📌 계산식 안내</strong>
-                • 지원한도액 = 피해주택 임차보증금이 2.4억 이하면 2.4억, 초과하면 피해주택 임차보증금<br>
+                • 지원한도액 = 피해주택 임차보증금이 2.4억 이하면 2.4억, 초과하면 피해주택 임차보증금 (최대 6억)<br>
+                • 전세보증금 한도 = 최대 6억<br>
                 • LH 전세지원금 = (전세보증금과 지원한도액 중 작은 금액) - 입주자 자본 부담금<br>
                 • 별도 부담금 = 전세임대주택 보증금 - 지원한도액<br>
                 • 보증금손실액 = 피해주택 임차보증금 - 배당금<br>
@@ -575,7 +593,7 @@
         }
 
         // 페이지 로드 시 고정값 및 안내 텍스트 설정
-        window.addEventListener('DOMContentLoaded', function() {
+        window.addEventListener('DOMContentLoaded', function () {
             // 입주자 자본 부담금 고정값 설정
             document.getElementById('capital').value = formatNumber(CONSTANTS.CAPITAL_BURDEN);
 
@@ -587,7 +605,7 @@
                     document.getElementById('jeonse').value = formatNumber(decryptedData.jeonse);
                     document.getElementById('damaged').value = formatNumber(decryptedData.damaged);
                     document.getElementById('dividend').value = formatNumber(decryptedData.dividend);
-                    
+
                     // 자동 계산 실행
                     updateAutoCalculations();
                 }
@@ -601,14 +619,14 @@
         const inputFields = ['jeonse', 'damaged', 'dividend'];
         inputFields.forEach(id => {
             const field = document.getElementById(id);
-            field.addEventListener('input', function(e) {
+            field.addEventListener('input', function (e) {
                 let value = removeCommas(e.target.value);
                 if (value && !isNaN(value)) {
                     e.target.value = formatNumber(value);
                 }
             });
 
-            field.addEventListener('blur', function(e) {
+            field.addEventListener('blur', function (e) {
                 let value = removeCommas(e.target.value);
                 if (value && !isNaN(value)) {
                     e.target.value = formatNumber(value);
@@ -632,9 +650,15 @@
             if (!jeonseValue) {
                 showError('jeonse', '전세보증금을 입력해주세요');
                 hasError = true;
-            } else if (isNaN(removeCommas(jeonseValue)) || parseFloat(removeCommas(jeonseValue)) <= 0) {
-                showError('jeonse', '올바른 금액을 입력해주세요');
-                hasError = true;
+            } else {
+                const jeonseNum = parseFloat(removeCommas(jeonseValue));
+                if (isNaN(jeonseNum) || jeonseNum <= 0) {
+                    showError('jeonse', '올바른 금액을 입력해주세요');
+                    hasError = true;
+                } else if (jeonseNum > CONSTANTS.MAX_LH_SUPPORT_LIMIT) {
+                    showError('jeonse', '전세보증금은 최대 6억원까지만 가능합니다');
+                    hasError = true;
+                }
             }
 
             // 피해주택 임차보증금 검증
@@ -668,10 +692,10 @@
 
             // 지원한도액 계산
             let maxLhSupport;
-            if (C7 <= CONSTANTS.MAX_LH_SUPPORT_LIMIT) {
-                maxLhSupport = CONSTANTS.MAX_LH_SUPPORT_LIMIT;
+            if (C7 <= CONSTANTS.MIN_LH_SUPPORT_LIMIT) {
+                maxLhSupport = CONSTANTS.MIN_LH_SUPPORT_LIMIT;
             } else {
-                maxLhSupport = C7;
+                maxLhSupport = Math.min(C7, CONSTANTS.MAX_LH_SUPPORT_LIMIT);
             }
 
             // C3 계산: LH 전세지원금 = MIN(전세보증금, 지원한도액) - 입주자 자본 부담금
@@ -708,7 +732,7 @@
             document.getElementById('normalRent').textContent = formatNumber(truncateToTens(C19)) + '원';
             document.getElementById('lossAmount').textContent = formatNumber(Math.round(C9)) + '원';
             document.getElementById('resultResidencePeriod').textContent = residencePeriodText;
-            
+
             // 부담금 결과 업데이트
             const totalBurden = CONSTANTS.CAPITAL_BURDEN + personalBurden;
             document.getElementById('capitalBurdenResult').textContent = formatNumber(CONSTANTS.CAPITAL_BURDEN) + '원';
@@ -719,11 +743,11 @@
             const baseRatePercent = (CONSTANTS.BASE_RATE * 100).toFixed(1);
             const preferentialRatePercent = (CONSTANTS.PREFERENTIAL_RATE * 100).toFixed(1);
             const effectiveRatePercent = (CONSTANTS.EFFECTIVE_RATE * 100).toFixed(1);
-            
+
             const exampleText = `
                 <div style="margin-top: 15px; padding: 10px; background-color: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px;">
                     <strong>📊 현재 입력값 기준 계산 예시</strong><br>
-                    • 지원한도액 = ${C7 <= CONSTANTS.MAX_LH_SUPPORT_LIMIT ? formatNumber(CONSTANTS.MAX_LH_SUPPORT_LIMIT) : formatNumber(C7)}원<br>
+                    • 지원한도액 = ${formatNumber(maxLhSupport)}원<br>
                     • LH 전세지원금 = (${formatNumber(C2)}과 ${formatNumber(maxLhSupport)} 중 작은 금액) - ${formatNumber(CONSTANTS.CAPITAL_BURDEN)} = <strong>${formatNumber(C3)}원</strong><br>
                     • 별도 부담금 = ${formatNumber(C2)} - ${formatNumber(maxLhSupport)} = <strong>${formatNumber(personalBurden)}원</strong><br>
                     • 보증금손실액 = ${formatNumber(C7)} - ${formatNumber(C8)} = <strong>${formatNumber(C9)}원</strong><br>
@@ -731,10 +755,11 @@
                     • 일반금리 월임대료 = (${formatNumber(C3)} - ${formatNumber(C7)}) × ${baseRatePercent}% ÷ 12 = <strong>${formatNumber(truncateToTens(C19))}원</strong>
                 </div>
             `;
-            
+
             document.getElementById('info-box').innerHTML = `
                 <strong>📌 계산식 안내</strong>
-                • 지원한도액 = 피해주택 임차보증금이 2.4억 이하면 2.4억, 초과하면 피해주택 임차보증금<br>
+                • 지원한도액 = 피해주택 임차보증금이 2.4억 이하면 2.4억, 초과하면 피해주택 임차보증금 (최대 6억)<br>
+                • 전세보증금 한도 = 최대 6억<br>
                 • LH 전세지원금 = (전세보증금과 지원한도액 중 작은 금액) - 입주자 자본 부담금<br>
                 • 별도 부담금 = 전세임대주택 보증금 - 지원한도액<br>
                 • 보증금손실액 = 피해주택 임차보증금 - 배당금<br>
@@ -750,7 +775,7 @@
 
             // 결과로 스크롤
             document.getElementById('burdenSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            
+
             // 공유 URL 업데이트
             updateShareUrl();
         }
@@ -759,7 +784,7 @@
         function showError(fieldId, message) {
             const field = document.getElementById(fieldId);
             const errorMsg = document.getElementById(fieldId + '-error');
-            
+
             field.classList.add('error');
             if (errorMsg) {
                 errorMsg.textContent = message;
@@ -773,7 +798,7 @@
             fields.forEach(fieldId => {
                 const field = document.getElementById(fieldId);
                 const errorMsg = document.getElementById(fieldId + '-error');
-                
+
                 field.classList.remove('error');
                 if (errorMsg) {
                     errorMsg.classList.remove('show');
@@ -783,7 +808,7 @@
 
         // 입력 시 에러 제거
         ['jeonse', 'damaged', 'dividend'].forEach(fieldId => {
-            document.getElementById(fieldId).addEventListener('input', function() {
+            document.getElementById(fieldId).addEventListener('input', function () {
                 this.classList.remove('error');
                 const errorMsg = document.getElementById(fieldId + '-error');
                 if (errorMsg) {
@@ -802,15 +827,15 @@
             let maxLhSupport = 0;
             if (C7Value && !isNaN(removeCommas(C7Value))) {
                 const C7 = parseFloat(removeCommas(C7Value));
-                
-                if (C7 <= CONSTANTS.MAX_LH_SUPPORT_LIMIT) {
+
+                if (C7 <= CONSTANTS.MIN_LH_SUPPORT_LIMIT) {
                     // 2.4억 이하인 경우 → 2.4억
-                    maxLhSupport = CONSTANTS.MAX_LH_SUPPORT_LIMIT;
+                    maxLhSupport = CONSTANTS.MIN_LH_SUPPORT_LIMIT;
                 } else {
-                    // 2.4억 초과인 경우 → 피해주택 임차보증금
-                    maxLhSupport = C7;
+                    // 2.4억 초과인 경우 → 피해주택 임차보증금 (최대 6억)
+                    maxLhSupport = Math.min(C7, CONSTANTS.MAX_LH_SUPPORT_LIMIT);
                 }
-                
+
                 document.getElementById('maxLhSupport').value = formatNumber(Math.round(maxLhSupport));
             } else {
                 // 피해주택 임차보증금이 없으면 지원한도액도 비움
@@ -821,23 +846,36 @@
             // 전세보증금과 지원한도액이 모두 있을 때만 계산
             if (C2Value && !isNaN(removeCommas(C2Value))) {
                 const C2 = parseFloat(removeCommas(C2Value));
-                const maxLhSupportValue = document.getElementById('maxLhSupport').value.trim();
-                
-                if (maxLhSupportValue && !isNaN(removeCommas(maxLhSupportValue))) {
-                    const maxLh = parseFloat(removeCommas(maxLhSupportValue));
-                    
-                    // LH 전세지원금: MIN(전세보증금, 지원한도액) - 입주자 자본 부담금
-                    const minValue = Math.min(C2, maxLh);
-                    const C3 = minValue - CONSTANTS.CAPITAL_BURDEN;
-                    document.getElementById('lh').value = formatNumber(Math.round(C3));
-                    
-                    // 별도 부담금: 전세임대주택 보증금 - 지원한도액
-                    const personalBurden = Math.max(0, C2 - maxLh);
-                    document.getElementById('personalBurden').value = formatNumber(Math.round(personalBurden));
-                } else {
-                    // 지원한도액이 없으면 비움
+
+                // 전세보증금이 6억 초과인지 실시간 검사
+                if (C2 > CONSTANTS.MAX_LH_SUPPORT_LIMIT) {
+                    showError('jeonse', '전세보증금은 최대 6억원까지만 가능합니다');
                     document.getElementById('lh').value = '';
                     document.getElementById('personalBurden').value = '';
+                } else {
+                    // 에러 상태 제거
+                    document.getElementById('jeonse').classList.remove('error');
+                    const errorMsg = document.getElementById('jeonse-error');
+                    if (errorMsg) errorMsg.classList.remove('show');
+
+                    const maxLhSupportValue = document.getElementById('maxLhSupport').value.trim();
+
+                    if (maxLhSupportValue && !isNaN(removeCommas(maxLhSupportValue))) {
+                        const maxLh = parseFloat(removeCommas(maxLhSupportValue));
+
+                        // LH 전세지원금: MIN(전세보증금, 지원한도액) - 입주자 자본 부담금
+                        const minValue = Math.min(C2, maxLh);
+                        const C3 = minValue - CONSTANTS.CAPITAL_BURDEN;
+                        document.getElementById('lh').value = formatNumber(Math.round(C3));
+
+                        // 별도 부담금: 전세임대주택 보증금 - 지원한도액
+                        const personalBurden = Math.max(0, C2 - maxLh);
+                        document.getElementById('personalBurden').value = formatNumber(Math.round(personalBurden));
+                    } else {
+                        // 지원한도액이 없으면 비움
+                        document.getElementById('lh').value = '';
+                        document.getElementById('personalBurden').value = '';
+                    }
                 }
             } else {
                 // 전세보증금이 없으면 비움
@@ -871,10 +909,10 @@
             const shareButton = document.getElementById('shareButton');
             if (shareUrl && shareButton) {
                 shareButton.style.display = 'block';
-                shareButton.onclick = function() {
-                    navigator.clipboard.writeText(shareUrl).then(function() {
+                shareButton.onclick = function () {
+                    navigator.clipboard.writeText(shareUrl).then(function () {
                         alert('공유 URL이 클립보드에 복사되었습니다!');
-                    }).catch(function() {
+                    }).catch(function () {
                         prompt('아래 URL을 복사하세요:', shareUrl);
                     });
                 };
@@ -884,11 +922,12 @@
         }
 
         // Enter 키로 계산
-        document.addEventListener('keypress', function(e) {
+        document.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 calculate();
             }
         });
     </script>
 </body>
+
 </html>
